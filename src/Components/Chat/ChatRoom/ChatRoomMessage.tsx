@@ -1,28 +1,28 @@
-import React from 'react';
-import { Typography } from 'src/Components/General';
+import React from "react";
+import { Typography } from "src/Components/General";
 
-import styled from 'styled-components';
-import ChatRoomImageMassage from './ChatRoomImageMassage';
-import { IChatRoomItemMessageItem } from 'src/Types/ChatRoom';
+import styled from "styled-components";
+import ChatRoomImageMassage from "./ChatRoomImageMassage";
+import { IChatRoomItemMessageItem } from "src/Types/ChatRoom";
 
 const ChatRoomMessage = ({ item }: { item: IChatRoomItemMessageItem }) => {
   const {
     id,
     isMine,
     message,
-    imageUrl = '',
+    imageUrl = "",
     messageType,
     uploadProcess,
   } = item || {};
-  if (messageType === 'text')
+  if (messageType === "text")
     return (
       <TextMessageBox isMine={isMine}>
-        <Typography variant={isMine ? 'style_1' : 'style_2'}>
+        <Typography variant={isMine ? "style_1" : "style_2"}>
           {message}
         </Typography>
       </TextMessageBox>
     );
-  else if (messageType === 'image')
+  else if (messageType === "image")
     return (
       <ChatRoomImageMassage
         id={id}
@@ -49,5 +49,6 @@ const TextMessageBox = styled.div<{
   > p {
     text-align: left;
     word-break: break-all;
+    white-space: pre-wrap;
   }
 `;

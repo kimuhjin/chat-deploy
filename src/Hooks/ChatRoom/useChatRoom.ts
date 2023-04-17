@@ -1,34 +1,34 @@
-import { useAtom, useSetAtom } from 'jotai';
-import { useMemo, useRef } from 'react';
+import { useAtom, useSetAtom } from "jotai";
+import { useMemo, useRef } from "react";
 
-import { v4 as uuidV4 } from 'uuid';
-import useChatRoomId from './useChatRoomId';
+import { v4 as uuidV4 } from "uuid";
+import useChatRoomId from "./useChatRoomId";
 import {
   AbortedPromise,
   postMessageChatApi,
   uploadFileToStorage,
-} from 'src/Api/ChatRoomApi';
-import { chat_room_image_upload_abort, chat_rooms_atom } from 'src/Store/atoms';
-import { IChatRoomItem } from 'src/Types/ChatRoom';
+} from "src/Api/ChatRoomApi";
+import { chat_room_image_upload_abort, chat_rooms_atom } from "src/Store/atoms";
+import { IChatRoomItem } from "src/Types/ChatRoom";
 
 const useChatRoom = () => {
   const roomId = useChatRoomId();
   const inputRef = useRef<HTMLInputElement>(null);
   const uploadingTask = useRef<AbortedPromise<{ success: boolean }> | null>(
-    null,
+    null
   );
 
   const [chatRooms, setChatRooms] = useAtom(chat_rooms_atom);
   const setUploadAbort = useSetAtom(chat_room_image_upload_abort);
 
   const chatRoom: IChatRoomItem | undefined = useMemo(() => {
-    return chatRooms.find(data => data.id === roomId);
+    return chatRooms.find((data) => data.id === roomId);
   }, [chatRooms]);
 
-  const updateChatRoom = (updatedMessageList: IChatRoomItem['messageList']) => {
-    const { id } = chatRoom || { id: '' };
+  const updateChatRoom = (updatedMessageList: IChatRoomItem["messageList"]) => {
+    const { id } = chatRoom || { id: "" };
     if (!updatedMessageList) return;
-    const updatedChatRooms: IChatRoomItem[] = chatRooms.map(chatRoom => {
+    const updatedChatRooms: IChatRoomItem[] = chatRooms.map((chatRoom) => {
       if (chatRoom.id === id) {
         return {
           ...chatRoom,
@@ -44,7 +44,7 @@ const useChatRoom = () => {
 
   const onImageSubmit = async (
     url: string,
-    onFlyImage: (id: string) => void,
+    onFlyImage: (id: string) => void
   ) => {
     if (uploadingTask.current) return;
     const id = uuidV4();
@@ -54,8 +54,8 @@ const useChatRoom = () => {
       id,
       isMine: true,
       isUnread: false,
-      messageType: 'image',
-      message: '사진을 보냈습니다.',
+      messageType: "image",
+      message: "사진을 보냈습니다.",
       imageUrl: url,
       messageTime: new Date().toISOString(),
     };
@@ -70,8 +70,8 @@ const useChatRoom = () => {
     };
 
     const onAbort = () => {
-      const { messageList, id } = chatRoom || { messageList: [], id: '' };
-      const newMessageList = messageList.filter(li => li.id !== id);
+      const { messageList, id } = chatRoom || { messageList: [], id: "" };
+      const newMessageList = messageList.filter((li) => li.id !== id);
       updateChatRoom(newMessageList);
       uploadingTask.current = null;
     };
@@ -82,13 +82,13 @@ const useChatRoom = () => {
 
       const task: AbortedPromise<{ success: boolean }> = uploadFileToStorage(
         onProgress,
-        onAbort,
+        onAbort
       );
       uploadingTask.current = task;
       setUploadAbort({ abort: task.abort });
       await task.promise;
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     } finally {
       uploadingTask.current = null;
     }
@@ -97,19 +97,20 @@ const useChatRoom = () => {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (inputRef.current) {
-      if (inputRef.current.value === '') return;
+      const inputValue = inputRef.current.value;
+      if (inputValue.trim() === "") return;
       const form = {
         targetId: roomId,
         id: uuidV4(),
         isMine: true,
         isUnread: false,
-        messageType: 'text',
-        message: inputRef.current.value,
+        messageType: "text",
+        message: inputValue,
         messageTime: new Date().toISOString(),
       };
       const res = await postMessageChatApi({ chatRooms, form });
       setChatRooms(res);
-      inputRef.current.value = '';
+      inputRef.current.value = "";
     }
   };
 
